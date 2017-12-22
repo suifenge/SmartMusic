@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SmartMusic</string>
+    <string name="press_again_to_exit">再按一次退出</string>
+    <string name="greetings_msg">请问需要什么帮助？</string>
+    <string name="play_music_answer">请欣赏%s的歌曲%s</string>
+    <string name="not_understand">我好像不太明白，请再说一次</string>
+    <string name="not_search_music">没有搜索到歌曲</string>
+</resources>

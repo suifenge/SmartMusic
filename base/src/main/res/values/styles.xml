@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="AppTheme.Base"/>
+
+    <style name="AppTheme.NoneTranslucent" parent="AppTheme.Base">
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/c_1379d6</item>
+        <item name="colorPrimaryDark">@color/c_1079d6</item>
+        <item name="colorAccent">@color/c_1079d6</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.SmoothProgressBarDefaults" parent="Theme.AppCompat">
+        <item name="cpbStyle">@style/CircularProgressBar</item>
+    </style>
+
+    <style name="CPB" parent="Widget.AppCompat.ProgressBar"/>
+
+    <style name="CircularProgressBar" parent="CPB">
+        <item name="cpb_color">@color/c_33b5e5</item>
+        <item name="cpb_stroke_width">@dimen/dp_4</item>
+        <item name="cpb_min_sweep_angle">20</item>
+        <item name="cpb_max_sweep_angle">300</item>
+        <item name="cpb_sweep_speed">1</item>
+        <item name="cpb_rotation_speed">1</item>
+    </style>
+
+    <style name="SwipeBackLayout">
+        <item name="edge_size">0dp</item>
+    </style>
+</resources>

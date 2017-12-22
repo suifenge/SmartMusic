@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:voiceView="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="@dimen/sp_16"/>
+
+        <ImageView
+            android:id="@+id/iv_start_voice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_start_voice"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
+
+        <com.suifeng.library.base.widget.voiceline.VoiceLineView
+            android:id="@+id/voice_line_view"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/white"
+            voiceView:maxVolume="36"
+            voiceView:middleLine="@color/orange"
+            voiceView:middleLineHeight="1dp"
+            voiceView:fineness="three"
+            voiceView:rectSpace="2dp"
+            voiceView:rectWidth="5dp"
+            voiceView:sensibility="four"
+            voiceView:viewMode="line"
+            android:visibility="gone"
+            voiceView:voiceLine="@color/orange"/>
+    </RelativeLayout>
+
+</RelativeLayout>
