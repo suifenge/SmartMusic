@@ -35,6 +35,8 @@ public class AIUIUtils {
                                 result.setCmdValue(AIUIResult.VALUE_PLAY);
                             } else if(attrValue.equals("停止")) {
                                 result.setCmdValue(AIUIResult.VALUE_PAUSE);
+                            } else if(attrValue.equals("暂停")) {
+                                result.setCmdValue(AIUIResult.VALUE_PAUSE);
                             }
                             return result;
                         } else if(attr.equals("歌曲顺序")) {
@@ -143,6 +145,8 @@ public class AIUIUtils {
                                     result.setCmdValue(AIUIResult.VALUE_VOLUME_SUB);
                                 } else if(value.equals("volume_min")) {
                                     result.setCmdValue(AIUIResult.VALUE_VOLUME_MIN);
+                                } else if(value.equals("pause")) {
+                                    result.setCmdValue(AIUIResult.VALUE_PAUSE);
                                 }
                                 return result;
                             }

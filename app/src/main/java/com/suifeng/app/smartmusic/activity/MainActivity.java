@@ -4,13 +4,11 @@ import android.Manifest;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.iflytek.cloud.util.ContactManager;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.suifeng.app.smartmusic.R;
 import com.suifeng.app.smartmusic.entity.AIUIResult;
@@ -21,6 +19,7 @@ import com.suifeng.app.smartmusic.utils.ToastUtils;
 import com.suifeng.app.smartmusic.view.MusicSearchView;
 import com.suifeng.lib.playerengine.api.PlaybackMode;
 import com.suifeng.lib.playerengine.api.PlayerListener;
+import com.suifeng.lib.playerengine.core.PlayListManager;
 import com.suifeng.lib.playerengine.core.Player;
 import com.suifeng.lib.playerengine.entity.Music;
 import com.suifeng.library.base.eventbus.EventCenter;
@@ -35,8 +34,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
-public class MainActivity extends BaseAppCompatActivity implements AIUIManager.ResultListener, MusicSearchView {
+public class MainActivity extends BaseAppCompatActivity implements AIUIManager.ResultListener, MusicSearchView, PlayerListener {
 
     private AIUIManager aiuiManager;
     @BindView(R.id.tv_info)
@@ -53,6 +54,7 @@ public class MainActivity extends BaseAppCompatActivity implements AIUIManager.R
     private AudioManager mAudioManager;
 
     private boolean playingBefore;
+    private Music currentMusic;
 
     @Override
     protected void getBundleExtras(Bundle extras) {
@@ -83,8 +85,9 @@ public class MainActivity extends BaseAppCompatActivity implements AIUIManager.R
         player = Player.getInstance(this);
         player.setPlayNextWhenError(true);
         player.setPlaybackMode(PlaybackMode.ALL);
-        player.setFadeVolumeWhenStartOrPause(false);    //
+        player.setFadeVolumeWhenStartOrPause(false);
         player.setShowNotification(false);
+        player.setListener(this);
         player.acquireWifiLock();
     }
 
@@ -146,14 +149,16 @@ public class MainActivity extends BaseAppCompatActivity implements AIUIManager.R
 
     @Override
     public void onAIUIResult(String result) {
-        if(playingBefore) {
-            player.resume();
-        }
         AIUIResult aiuiResult = AIUIUtils.parseAIUIResult(result);
         if(aiuiResult == null) {
             aiuiManager.stopListen();
-            infoTv.setText(R.string.not_understand);
-            aiuiManager.readText(getString(R.string.not_understand), this::startAIUI);
+            Observable.timer(500, TimeUnit.MILLISECONDS)
+                    .compose(bindToLifecycle())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aLong -> {
+                        infoTv.setText(R.string.not_understand);
+                        aiuiManager.readText(getString(R.string.not_understand), this::startAIUI);
+                    });
             return;
         }
         int cmdName = aiuiResult.getCmdName();
@@ -163,20 +168,26 @@ public class MainActivity extends BaseAppCompatActivity implements AIUIManager.R
             int musicDataType = data.getInt(AIUIResult.MUSIC_DATA_TYPE);
             if(musicDataType == AIUIResult.MUSIC_DATA_TYPE_VALUE_SONG) {
                 String song = data.getString(AIUIResult.MUSIC_DATA_SONG);
-                presenter.searchMusicByNameOrArtist(song);
+                presenter.searchQQMusicByNameOrArtist(song);
             } else if(musicDataType == AIUIResult.MUSIC_DATA_TYPE_VALUE_ARTIST) {
                 String artist = data.getString(AIUIResult.MUSIC_DATA_ARTIST);
-                presenter.searchMusicByNameOrArtist(artist);
+                presenter.searchQQMusicByNameOrArtist(artist);
 
             } else if(musicDataType == AIUIResult.MUSIC_DATA_TYPE_VALUE_ALL) {
                 String song = data.getString(AIUIResult.MUSIC_DATA_SONG);
                 String artist = data.getString(AIUIResult.MUSIC_DATA_ARTIST);
-                presenter.searchMusicByNameOrArtist(artist + "-" + song);
+                presenter.searchQQMusicByNameOrArtist(artist + "-" + song);
             }
         } else if(cmdName == AIUIResult.INSTRUCTION) {
             doInstruction(aiuiResult.getCmdValue());
         } else if(cmdName == AIUIResult.DIAL) {
 
+        }
+    }
+
+    private void resumePlay() {
+        if(playingBefore) {
+            player.resume();
         }
     }
 
@@ -212,30 +223,35 @@ public class MainActivity extends BaseAppCompatActivity implements AIUIManager.R
                 player.prev();
                 break;
             case AIUIResult.VALUE_PLAY_ALL:
+                resumePlay();
                 player.setPlaybackMode(PlaybackMode.ALL);
                 break;
             case AIUIResult.VALUE_PLAY_SHUFFLE:
+                resumePlay();
                 player.setPlaybackMode(PlaybackMode.SHUFFLE);
                 break;
             case AIUIResult.VALUE_PLAY_SINGLE:
+                resumePlay();
                 player.setPlaybackMode(PlaybackMode.SINGLE_REPEAT);
                 break;
             case AIUIResult.VALUE_VOLUME_ADD:
+                resumePlay();
                 mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,AudioManager.ADJUST_RAISE,
                         AudioManager.FX_FOCUS_NAVIGATION_UP);
                 break;
             case AIUIResult.VALUE_VOLUME_MAX:
+                resumePlay();
                 int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
                 break;
             case AIUIResult.VALUE_VOLUME_SUB:
+                resumePlay();
                 mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,AudioManager.ADJUST_LOWER,
                         AudioManager.FX_FOCUS_NAVIGATION_UP);
                 break;
             case AIUIResult.VALUE_VOLUME_MIN:
+                resumePlay();
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
-                break;
-            case AIUIResult.VALUE_CALL_PHONE:
                 break;
         }
     }
@@ -248,8 +264,23 @@ public class MainActivity extends BaseAppCompatActivity implements AIUIManager.R
 
     @Override
     public void searMusicList(List<Music> musicList) {
+        if(player.isPlaying()) {
+            player.pause();
+        }
+        PlayListManager playListManager = player.getPlayListManager();
+        int lastIndex = -1;
+        if(playListManager != null) {
+            lastIndex = playListManager.getAllTracks().length;
+        }
         player.setPlayMusicList(musicList);
-        aiuiManager.readText(String.format(getString(R.string.play_music_answer), musicList.get(0).getArtist(), musicList.get(0).getTitle()), () -> player.play());
+        if(lastIndex != -1) {
+            playListManager.select(lastIndex);
+        }
+        aiuiManager.readText(String.format(getString(R.string.play_music_answer), musicList.get(0).getArtist(), musicList.get(0).getSong()), () -> {
+            player.play();
+            currentMusic = musicList.get(0);
+            infoTv.setText(currentMusic.getTitle());
+        });
     }
 
     @Override
@@ -316,9 +347,6 @@ public class MainActivity extends BaseAppCompatActivity implements AIUIManager.R
                 ToastUtils.showShortToast(R.string.press_again_to_exit);
                 exitTime = System.currentTimeMillis();
             } else {
-                if(aiuiManager != null) {
-                    aiuiManager.destroyAll();
-                }
                 BaseAppManager.getInstance().exit(false);
             }
             return true;
@@ -331,5 +359,49 @@ public class MainActivity extends BaseAppCompatActivity implements AIUIManager.R
         super.onDestroy();
         presenter.detachView();
         player.releaseWifiLock();
+        if(aiuiManager != null) {
+            aiuiManager.destroyAll();
+        }
+        aiuiManager = null;
+        if(player != null) {
+            player.stop();
+        }
+        player = null;
+    }
+
+    @Override
+    public void onTrackBuffering(String uri, int percent) {
+
+    }
+
+    @Override
+    public void onTrackStart(String uri) {
+
+    }
+
+    @Override
+    public void onTrackChange(String uri) {
+        currentMusic = (Music) player.getCurrentMusic();
+        infoTv.setText(currentMusic.getTitle());
+    }
+
+    @Override
+    public void onTrackProgress(String uri, int percent, int currentDuration, int duration) {
+
+    }
+
+    @Override
+    public void onTrackPause(String uri) {
+
+    }
+
+    @Override
+    public void onTrackStop(String uri) {
+
+    }
+
+    @Override
+    public void onTrackStreamError(String uri, int what, int extra) {
+
     }
 }

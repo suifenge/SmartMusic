@@ -4,7 +4,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.suifeng.app.smartmusic.CustomApplication;
-import com.suifeng.app.smartmusic.net.api.SearchMusicService;
+import com.suifeng.app.smartmusic.net.api.SearchQQMusicService;
 import com.suifeng.app.smartmusic.utils.Constant;
 import com.suifeng.library.base.netstatus.NetUtils;
 
@@ -36,8 +36,8 @@ public class RetrofitFactory {
         initOkHttpClient();
     }
 
-    public static SearchMusicService getSearchMusicService() {
-        return createApi(SearchMusicService.class, Constant.BASE_MUSIC_SEARCH_URL);
+    public static SearchQQMusicService getSearchQQMusicService() {
+        return createApi(SearchQQMusicService.class, Constant.BASE_MUSIC_SEARCH_URL);
     }
 
     /**

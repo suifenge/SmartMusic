@@ -26,9 +26,9 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':base')
-    implementation 'com.suifeng:playerengine:1.0.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
     implementation files('libs/AlsaRecorder.jar')
     implementation files('libs/Msc.jar')
     implementation files('libs/Sunflower.jar')
+    implementation project(':playerengine')
 }

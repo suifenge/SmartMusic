@@ -1,8 +1,8 @@
 package com.suifeng.app.smartmusic.presenter;
 
-import com.suifeng.app.smartmusic.entity.SearchMusicEntity;
+import com.suifeng.app.smartmusic.entity.SearchQQMusicEntity;
 import com.suifeng.app.smartmusic.net.RetrofitFactory;
-import com.suifeng.app.smartmusic.net.api.SearchMusicService;
+import com.suifeng.app.smartmusic.net.api.SearchQQMusicService;
 import com.suifeng.app.smartmusic.utils.Constant;
 import com.suifeng.app.smartmusic.utils.QQMusicParser;
 import com.suifeng.app.smartmusic.view.MusicSearchView;
@@ -24,11 +24,11 @@ public class MusicSearchPresenter extends BasePresenter<MusicSearchView>{
         this.provider = provider;
     }
 
-    public void searchMusicByNameOrArtist(String keyWord) {
-        SearchMusicService searchMusicService = RetrofitFactory.getSearchMusicService();
-        searchMusicService.getSearchMusic(keyWord)
+    public void searchQQMusicByNameOrArtist(String keyWord) {
+        SearchQQMusicService searchQQMusicService = RetrofitFactory.getSearchQQMusicService();
+        searchQQMusicService.getSearchQQMusic(keyWord)
                           .compose(RxSchedulers.compose(provider))
-                          .map(this::getMusicList)
+                          .map(this::getQQMusicList)
                           .subscribe(musicList -> {
                               if(musicList.isEmpty() || musicList.size() < 1) {
                                   getMvpView().searchEmpty();
@@ -39,21 +39,28 @@ public class MusicSearchPresenter extends BasePresenter<MusicSearchView>{
 
     }
 
-    private List<Music> getMusicList(SearchMusicEntity searchMusicEntity) {
+    private List<Music> getQQMusicList(SearchQQMusicEntity searchQQMusicEntity) {
         List<Music> musicList = new ArrayList<>();
-        for (int i = 0; i < searchMusicEntity.getData().getSong().getList().size(); i++) {
-            SearchMusicEntity.DataBean.SongBean.ListBean listBean = searchMusicEntity.getData().getSong().getList().get(i);
+        for (int i = 0; i < searchQQMusicEntity.getData().getSong().getList().size(); i++) {
+            SearchQQMusicEntity.DataBean.SongBean.ListBean listBean = searchQQMusicEntity.getData().getSong().getList().get(i);
             String f = listBean.getF();
             Music music = new Music();
-            music.setTitle(listBean.getFsong());
+            music.setSong(listBean.getFsong());
             music.setArtist(listBean.getFsinger());
+            music.setTitle(music.getSong() + "-" + music.getArtist());
             music.setUrl(String.format(Constant.BASE_MUSIC_URL, QQMusicParser.getMusicId(f)));
             music.setAlbum(listBean.getAlbumName_hilight());
             music.setAlbumId(QQMusicParser.getMusicAlbumId(f));
             music.setDuration(QQMusicParser.getDuration(f));
             music.setSize(QQMusicParser.getMusicSize(f));
+            music.setCover(getCoverUrl(music.getAlbumId()));
             musicList.add(music);
         }
         return musicList;
+    }
+
+    private String getCoverUrl(long albumId) {
+        String encry = String.valueOf(albumId % 100);
+        return String.format(Constant.BASE_ALBUM_PIRTURE_URL, encry, String.valueOf(albumId));
     }
 }
