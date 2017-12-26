@@ -8,5 +8,7 @@ public interface Constant {
 
     String BASE_MUSIC_SEARCH_URL = "http://s.music.qq.com/fcgi-bin/";
     String BASE_MUSIC_URL = "http://ws.stream.qqmusic.qq.com/%s.m4a?fromtag=46";
-    String BASE_ALBUM_PIRTURE_URL = "http://imgcache.qq.com/music/photo/album_500/%s/500_albumpic_%s_0.jpg";
+    String BASE_ALBUM_PICTURE_URL = "http://imgcache.qq.com/music/photo/album_500/%s/500_albumpic_%s_0.jpg";
+    String ENSURE_DIAL_NUMBER = "确认拨打%s的号码吗？";
+
 }

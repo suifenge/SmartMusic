@@ -5,4 +5,8 @@
     <string name="play_music_answer">请欣赏%s的歌曲%s</string>
     <string name="not_understand">我好像不太明白，请再说一次</string>
     <string name="not_search_music">没有搜索到歌曲</string>
+    <string name="ensure_dial_contact">确认拨打%s吗？</string>
+    <string name="not_found_contact">没有为您找到%s，请确认要拨打的联系人</string>
+    <string name="found_multiple_contacts">为您找到%s个叫%s的联系人，请问您要拨打哪个？</string>
+    <string name="sequence_not_found">没有找到第%s个联系人，请问是第几个？</string>
 </resources>

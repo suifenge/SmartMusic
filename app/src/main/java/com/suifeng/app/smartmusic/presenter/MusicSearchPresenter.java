@@ -60,7 +60,7 @@ public class MusicSearchPresenter extends BasePresenter<MusicSearchView>{
     }
 
     private String getCoverUrl(long albumId) {
-        String encry = String.valueOf(albumId % 100);
-        return String.format(Constant.BASE_ALBUM_PIRTURE_URL, encry, String.valueOf(albumId));
+        String encryption = String.valueOf(albumId % 100);
+        return String.format(Constant.BASE_ALBUM_PICTURE_URL, encryption, String.valueOf(albumId));
     }
 }

@@ -7,6 +7,7 @@ public class AIUIResult {
     public static final int PLAY = 0;
     public static final int INSTRUCTION = 1;
     public static final int DIAL = 2;
+    public static final int USER_ANSWER = 3;
 
     public static final int VALUE_PLAY = 0;
     public static final int VALUE_PAUSE = 1;
@@ -20,6 +21,7 @@ public class AIUIResult {
     public static final int VALUE_VOLUME_SUB = 9;
     public static final int VALUE_VOLUME_MIN = 10;
     public static final int VALUE_CALL_PHONE = 11;
+    public static final int VALUE_DIAL_ANSWER = 12;
 
     public static final String MUSIC_DATA_TYPE = "music_data_type";
     public static final int MUSIC_DATA_TYPE_VALUE_ARTIST = 0;
@@ -33,6 +35,12 @@ public class AIUIResult {
     public static final int CALL_PHONE_NAME = 0;
     public static final int CALL_PHONE_CODE = 1;
     public static final int CALL_PHONE_ALL = 2;
+    public static final String DIAL_ANSWER_DATA = "call_phone_answer_data";
+    public static final int DIAL_ANSWER_CONFIRM = 0;
+    public static final int DIAL_ANSWER_CANCEL = 1;
+    public static final int DIAL_ANSWER_QUIT = 2;
+    public static final int DIAL_ANSWER_SEQUENCE = 3;
+    public static final String ANSWER_SEQUENCE = "answer_sequence";
 
     public static final String CONTACT_NAME ="contact_name";
     public static final String CONTACT_CODE ="contact_code";

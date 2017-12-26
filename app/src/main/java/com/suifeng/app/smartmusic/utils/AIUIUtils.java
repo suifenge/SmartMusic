@@ -10,6 +10,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.util.Arrays;
+
 public class AIUIUtils {
 
     public static AIUIResult parseAIUIResult(String resultStr) {
@@ -156,9 +158,9 @@ public class AIUIUtils {
                     JSONArray semanticArray = jsonObject.getJSONArray("semantic");
                     JSONObject object = semanticArray.getJSONObject(0);
                     String intent = object.getString("intent");
+                    JSONArray slots = object.getJSONArray("slots");
+                    result.setCmdName(AIUIResult.DIAL);
                     if(intent.equals("DIAL")) {
-                        JSONArray slots = object.getJSONArray("slots");
-                        result.setCmdName(AIUIResult.DIAL);
                         result.setCmdValue(AIUIResult.VALUE_CALL_PHONE);
                         if(slots.length() == 1) {
                             JSONObject valueObject = slots.getJSONObject(0);
@@ -168,10 +170,12 @@ public class AIUIUtils {
                             if (name.equals("name")) {
                                 data.putInt(AIUIResult.CALL_PHONE_TYPE, AIUIResult.CALL_PHONE_NAME);
                                 data.putString(AIUIResult.CONTACT_NAME, value);
+                                result.setData(data);
                             } else if(name.equals("code")){
                                 data.putInt(AIUIResult.CALL_PHONE_TYPE, AIUIResult.CALL_PHONE_CODE);
                                 data.putString(AIUIResult.CONTACT_CODE, value);
-                                result.setAnswerText(jsonObject.getJSONObject("answer").getString("text"));
+                                result.setData(data);
+                                result.setAnswerText(String.format(Constant.ENSURE_DIAL_NUMBER, value));
                             }
                             return result;
                         } else if(slots.length() == 2) {
@@ -186,12 +190,52 @@ public class AIUIUtils {
                             String value2 = valueObject2.getString("value");
                             data.putString(AIUIResult.CONTACT_NAME, value2);
                             result.setAnswerText(jsonObject.getJSONObject("answer").getString("text"));
+                            result.setData(data);
                             return result;
                         }
+                    } else if(intent.equals("INSTRUCTION")) {
+                        result.setCmdValue(AIUIResult.VALUE_DIAL_ANSWER);
+                        if(slots.length() == 1) {
+                            JSONObject valueObject = slots.getJSONObject(0);
+                            String name = valueObject.getString("name");
+                            String value = valueObject.getString("value");
+                            Bundle data = new Bundle();
+                            if(name.equals("insType")) {
+                                if(value.equals("CONFIRM")) {
+                                    data.putInt(AIUIResult.DIAL_ANSWER_DATA, AIUIResult.DIAL_ANSWER_CONFIRM);
+                                    result.setData(data);
+                                    return result;
+                                } else if(value.equals("QUIT")) {
+                                    data.putInt(AIUIResult.DIAL_ANSWER_DATA, AIUIResult.DIAL_ANSWER_QUIT);
+                                    result.setData(data);
+                                    return result;
+                                }
+                            }
+                        } else if(slots.length() == 4) {
+                            JSONObject valueObject = slots.getJSONObject(2);
+                            String name = valueObject.getString("name");
+                            if(name.equals("posRank.offset")) {
+                                String value = valueObject.getString("value");
+                                Bundle data = new Bundle();
+                                data.putInt(AIUIResult.DIAL_ANSWER_DATA, AIUIResult.DIAL_ANSWER_SEQUENCE);
+                                data.putInt(AIUIResult.ANSWER_SEQUENCE, Integer.parseInt(value));
+                                result.setData(data);
+                                return result;
+                            }
+                        }
+                    } else if(intent.equals("CANCEL")) {
+                        result.setCmdValue(AIUIResult.VALUE_DIAL_ANSWER);
+                        Bundle data = new Bundle();
+                        data.putInt(AIUIResult.DIAL_ANSWER_DATA, AIUIResult.DIAL_ANSWER_CANCEL);
+                        result.setData(data);
+                        result.setAnswerText(jsonObject.getJSONObject("answer").getString("text"));
+                        return result;
                     }
                 }
             } else {
                 //做讯飞没有识别出来的语意分析
+                String text = result.getSourceText();
+
             }
         } catch (JSONException e) {
             e.printStackTrace();
