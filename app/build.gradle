@@ -30,5 +30,5 @@ dependencies {
     implementation files('libs/AlsaRecorder.jar')
     implementation files('libs/Msc.jar')
     implementation files('libs/Sunflower.jar')
-    implementation project(':playerengine')
+    implementation 'com.suifeng:playerengine:1.0.3'
 }

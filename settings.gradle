@@ -1,1 +1,1 @@
-include ':app', ':base', ':playerengine'
+include ':app', ':base'
